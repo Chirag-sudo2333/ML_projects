@@ -1,31 +1,37 @@
 import random
-b = ["scissiors", "paper", "rock"]
+b = ["scissors", "paper", "rock"]
+emoji = { "rock" : "🪨",
+         "paper" : "📄",
+         "scissors" : "✃"
+         }
+shrt = {
+    "r" : "rock",
+    "p" : "paper",
+    "s" : "scissors"
+}
+rules = {
+    "rock" : "scissors",
+    "paper" : "rock",
+    "scissors" : "paper"
+}
 def game():
     while True:
         opp_chc = random.choice(b)
-        user_chc = str(input("Enter your choice ")).lower()
-        print("You chose " +user_chc)
-        print("Opponent chose " +opp_chc)
-        if opp_chc == "scissiors" and user_chc == "rock":
+        user_ch = str(input("Enter your choice\n R for rock, P for paper, and S for Scissors ")).lower()
+        user_chc = shrt[user_ch]
+        print("You chose " + emoji[user_chc])
+        print("Opponent chose " +emoji[opp_chc])
+        if user_chc == opp_chc:
+            print("Draw!!")
+        elif rules[user_chc] == opp_chc:
             print("You win!!")
-            break
-        elif opp_chc == "scissiors" and user_chc == "paper":
-            print("You loose!!")
-            break
-        elif opp_chc == "rock" and user_chc == "paper":
-            print("You win!!")
-            break
-        elif opp_chc == "rock" and user_chc == "scissiors":
-            print("You loose!!")
-            break
-        elif opp_chc =="paper" and user_chc =="scissiors":
-            print("You win!!")
-            break
-        elif opp_chc == "paper" and user_chc == "rock":
-            print("You loose!!")
-            break
-        elif opp_chc == user_chc:
-            print("Draw!! Try again")
         else:
-            print('Invalid Input!!!')
+            print("You lose!!")
+        x = str(input("Do you want to continue? (y/n) ")) 
+
+        if x == "n":
+                    break
+        elif x!= "y":
+                    print("Invalid Choice.")
+            
 game()
