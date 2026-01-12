@@ -114,6 +114,10 @@ bool_cols = df.select_dtypes(include=["bool"]).columns
 for col in bool_cols:
     df[col] = df[col].astype(int)
 
+
+# Count defaults (1) and repaid (0)
+default_counts = df['dpnm'].value_counts()
+default_percent = df['dpnm'].value_counts(normalize=True) * 100
 # -----------------------------------
 # 12. FINAL CHECK
 # -----------------------------------

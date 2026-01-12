@@ -28,3 +28,16 @@ pipeline = Pipeline([
 pipeline.fit(X_train, y_train)
 y_pred = pipeline.predict(X_test)
 print('Accuracy is ',accuracy_score(y_pred, y_test)*100, '%')
+
+
+
+# Count defaults (1) and repaid (0)
+default_counts = df['dpnm'].value_counts()
+default_percent = df['dpnm'].value_counts(normalize=True) * 100
+
+# Display results
+print("Counts of loan outcomes:")
+print(default_counts)
+print("\nPercentage of loan outcomes:")
+print(default_percent.round(2))
+
