@@ -7,7 +7,7 @@ import numpy as np
 df = pd.read_csv("raw_data.csv")
 
 # -----------------------------------
-# 2. QUICK LOOK
+# 2. QUICK INSPECTION
 # -----------------------------------
 print(df.head())
 print(df.dtypes)
@@ -29,37 +29,31 @@ df.columns = (
 df = df.drop_duplicates()
 
 # -----------------------------------
-# 5. REPLACE COMMON GARBAGE VALUES
+# 5. REPLACE COMMON GARBAGE VALUES WITH NaN
 # -----------------------------------
-df.replace(
-    ["?", "unknown", "Unknown", "N/A", "na", "null", ""],
-    np.nan,
-    inplace=True
-)
+garbage_values = ["?", "unknown", "Unknown", "N/A", "na", "null", ""]
+df.replace(garbage_values, np.nan, inplace=True)
 
 # -----------------------------------
-# 6. FIX NUMERICAL DATA STORED AS OBJECT (DYNAMIC)
+# 6. DYNAMIC NUMERIC CONVERSION
 # -----------------------------------
-numeric_like_cols = df.select_dtypes(
-    exclude=["int64", "float64", "bool"]
-).columns
+# Convert object columns to numeric where possible
+object_cols = df.select_dtypes(include=["object"]).columns
 
-for col in numeric_like_cols:
-    # Try converting object columns to numeric
-    converted = pd.to_numeric(df[col], errors="coerce")
-
-    # Only keep if conversion produces at least some numbers
-    if converted.notna().sum() > 0:
-        df[col] = converted
+for col in object_cols:
+    numeric_version = pd.to_numeric(df[col], errors="coerce")
+    if numeric_version.notna().sum() > 0:
+        df[col] = numeric_version
 
 # -----------------------------------
-# 7. HANDLE IMPOSSIBLE VALUES
+# 7. HANDLE IMPOSSIBLE VALUES (SANITY CHECKS)
 # -----------------------------------
 if "age" in df.columns:
     df.loc[df["age"] <= 0, "age"] = np.nan
-
 if "salary" in df.columns:
     df.loc[df["salary"] < 0, "salary"] = np.nan
+
+# Add more sanity checks here if needed, e.g., scores <= max_value
 
 # -----------------------------------
 # 8. HANDLE MISSING VALUES
@@ -97,15 +91,12 @@ for col, mapping in ordered_mappings.items():
         df[col] = df[col].map(mapping)
 
 # -----------------------------------
-# 10. ONE-HOT ENCODE SELECTED UNORDERED COLUMNS
+# 10. ONE-HOT ENCODE UNORDERED CATEGORICALS
 # -----------------------------------
-# Replace with the actual columns you know are unordered categories
-unordered_cols = ["gender", "department", "marital_status"]
+unordered_cols = [c for c in df.select_dtypes(include=["object"]).columns 
+                  if c not in ordered_mappings.keys()]
 
-
-# Apply one-hot encoding
 df = pd.get_dummies(df, columns=unordered_cols, drop_first=True)
-
 
 # -----------------------------------
 # 11. BOOLEAN → INT
@@ -114,20 +105,18 @@ bool_cols = df.select_dtypes(include=["bool"]).columns
 for col in bool_cols:
     df[col] = df[col].astype(int)
 
-
-# Count defaults (1) and repaid (0)
-default_counts = df['dpnm'].value_counts()
-default_percent = df['dpnm'].value_counts(normalize=True) * 100
 # -----------------------------------
 # 12. FINAL CHECK
 # -----------------------------------
 print(df.info())
 print(df.head())
+print("Missing values remaining:\n", df.isnull().sum())
 
 # -----------------------------------
 # DATA IS NOW:
-# ✔ NO OBJECT TYPES
+# ✔ CLEAN
+# ✔ NUMERICAL / ENCODED
+# ✔ NO DUPLICATES
 # ✔ NO MISSING VALUES
-# ✔ FULLY NUMERICAL
 # ✔ ML-READY
 # -----------------------------------
